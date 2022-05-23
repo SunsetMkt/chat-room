@@ -6,8 +6,8 @@ const compression = require('compression')
 const path = require('path')
 const IO = require('socket.io')
 const xss = require('xss')
-const db = require('./db')
-const filter = require('./utils/filter')
+//const db = require('./db')
+//const filter = require('./utils/filter')
 
 const app = express()
 
@@ -51,7 +51,7 @@ socketIO.on('connection', socket => {
   }else{
     roomList[roomId].push(user)
     socketIO.to(roomId).emit('sys', `${user.name}(${user.uid}) join the chat.`)
-    console.log(`${user.name}(${user.uid})::${sid} join the room(${roomId})`)
+    //console.log(`${user.name}(${user.uid})::${sid} join the room(${roomId})`)
   }
 
   socketIO.to(roomId).emit('init', user)
@@ -72,7 +72,7 @@ socketIO.on('connection', socket => {
 
     const msg = `${oldName}(${user.uid}) changed the name from ${oldName} to ${name}.`
     socketIO.to(roomId).emit('sys', processInput(msg))
-    console.log(msg)
+    //console.log(msg)
   })
 
   socket.on('leave', () => {
@@ -97,7 +97,7 @@ socketIO.on('connection', socket => {
         socketIO.to(roomId).emit('online', roomList[roomId])
       }
 
-      console.log(`${user.name}(${user.uid})::${sid} leave the room(${roomId})`)
+      //console.log(`${user.name}(${user.uid})::${sid} leave the room(${roomId})`)
     }
 
     // Clean the room if no one is chatting
@@ -122,27 +122,34 @@ socketIO.on('connection', socket => {
     if(roomId === 'demo') return
 
     // Log message into the database
-    db.setRecord(msgItem)
+    //db.setRecord(msgItem)
   })
 
 })
 
 // Print room list to console
-setInterval(() => {
-  console.log('room list:', JSON.stringify(roomList))
-}, 1000 * 30)
+//setInterval(() => {
+  //console.log('room list:', JSON.stringify(roomList))
+//}, 1000 * 30)
+
+function randomString(length, chars) {
+  var result = '';
+  for (var i = length; i > 0; --i) result += chars[Math.floor(Math.random() * chars.length)];
+  return result;
+}
 
 app.set('roomList', roomList)
 app.use('/room', roomRouter)
 
+var rString = randomString(32, '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ');
 app.get('/', (req, res) => {
-  res.redirect('/room/@demo')
+  res.redirect('/room/@' + rString)
 });
 
-app.get('/filter', (req, res) => {
-  const { q } = req.query
-  res.send(processInput(q))
-});
+//app.get('/filter', (req, res) => {
+//  const { q } = req.query
+//  res.send(processInput(q))
+//});
 
 app.get('/heart-beat', (req, res) => {
   res.set({
@@ -150,7 +157,7 @@ app.get('/heart-beat', (req, res) => {
   })
 
   res.send('alive')
-  console.log('heart-beat')
+  //console.log('heart-beat')
 });
 
 server.listen(config.app.port, () => {
@@ -173,5 +180,6 @@ function getCookie(cookie, name) {
 function processInput(source, flag){
   if(flag) source = xss(source)
 
-  return filter(source)
+  //return filter(source)
+  return source
 }
